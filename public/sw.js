@@ -1,9 +1,9 @@
-const CACHE_NAME = "kenshin-dekitayo-v98";
+const CACHE_NAME = "kenshin-dekitayo-v115";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
-  "./app.js?build=v98",
+  "./app.js?build=v115",
   "./assets/top-hero-doctor.png",
   "./assets/course-still-mouth.png",
   "./assets/course-vision.png",

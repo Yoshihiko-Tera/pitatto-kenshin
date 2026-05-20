@@ -1,6 +1,6 @@
 ﻿window.__appModuleLoaded = true;
 
-const CACHE_NAME = "kenshin-dekitayo-v110";
+const CACHE_NAME = "kenshin-dekitayo-v115";
 const SETTINGS_KEY = "kenshin-dekitayo.settings";
 const MOUTH_EEE_GAP_THRESHOLD_MIN = 0.1;
 const SUCCESS_MESSAGE = "じょうずに できた すごい！";
@@ -12,6 +12,7 @@ const DEFAULT_STILL_PROMPT_IMAGES = {
 };
 const DEFAULT_SETTINGS = {
   targetSeconds: 5,
+  stillRepeatCount: 1,
   ecgTargetSeconds: 10,
   mouthThreshold: 0.56,
   mouthMode: "open",
@@ -66,6 +67,8 @@ const ui = {
   resetProgress: document.getElementById("reset-progress"),
   targetSeconds: document.getElementById("setting-target-seconds"),
   targetSecondsValue: document.getElementById("setting-target-seconds-value"),
+  stillRepeatCount: document.getElementById("setting-still-repeat-count"),
+  stillRepeatCountValue: document.getElementById("setting-still-repeat-count-value"),
   ecgTargetSeconds: document.getElementById("setting-ecg-target-seconds"),
   ecgTargetSecondsValue: document.getElementById("setting-ecg-target-seconds-value"),
   mouthThreshold: document.getElementById("setting-mouth-threshold"),
@@ -125,6 +128,7 @@ const ui = {
     scoreLabel: document.getElementById("ratio-label"),
     promptText: document.getElementById("prompt-text"),
     celebration: document.getElementById("celebration"),
+    retry: document.querySelector('[data-retry-mode="mouth"]'),
     face: document.getElementById("mouth-face"),
     mouthShape: document.getElementById("illustration-mouth"),
     modeButtons: Array.from(document.querySelectorAll("[data-mouth-mode]")),
@@ -140,6 +144,7 @@ const ui = {
     detectorState: document.getElementById("still-detector-state"),
     providerChip: document.getElementById("still-provider-chip"),
     providerHelp: document.getElementById("still-provider-help"),
+    phaseStart: document.getElementById("still-phase-start"),
     manualTrigger: document.getElementById("still-manual-trigger"),
     progressLabel: document.getElementById("still-progress-label"),
     progressFill: document.getElementById("still-progress-fill"),
@@ -147,6 +152,7 @@ const ui = {
     scoreLabel: document.getElementById("still-score-label"),
     promptText: document.getElementById("still-prompt-text"),
     celebration: document.getElementById("still-celebration"),
+    retry: document.querySelector('[data-retry-mode="still"]'),
   },
   vision: {
     video: document.getElementById("vision-camera"),
@@ -163,6 +169,7 @@ const ui = {
     scoreLabel: document.getElementById("vision-score-label"),
     promptText: document.getElementById("vision-prompt-text"),
     celebration: document.getElementById("vision-celebration"),
+    retry: document.querySelector('[data-retry-mode="vision"]'),
     eyeCoach: document.getElementById("vision-eye-coach"),
     landolt: document.getElementById("vision-landolt"),
     feedback: document.getElementById("vision-answer-feedback"),
@@ -183,6 +190,7 @@ const ui = {
     scoreLabel: document.getElementById("hearing-score-label"),
     promptText: document.getElementById("hearing-prompt-text"),
     celebration: document.getElementById("hearing-celebration"),
+    retry: document.querySelector('[data-retry-mode="hearing"]'),
     startButton: document.getElementById("hearing-start-button"),
     stopButton: document.getElementById("hearing-stop-button"),
     touchpad: document.getElementById("hearing-touchpad"),
@@ -196,6 +204,7 @@ const ui = {
 
 ui.settingFields = {
   targetSeconds: ui.targetSeconds ? ui.targetSeconds.closest(".field") : null,
+  stillRepeatCount: ui.stillRepeatCount ? ui.stillRepeatCount.closest(".field") : null,
   ecgTargetSeconds: ui.ecgTargetSeconds ? ui.ecgTargetSeconds.closest(".field") : null,
   mouthThreshold: ui.mouthThreshold ? ui.mouthThreshold.closest(".field") : null,
   mouthEeeWidthThreshold: ui.mouthEeeWidthThreshold ? ui.mouthEeeWidthThreshold.closest(".field") : null,
@@ -237,6 +246,7 @@ function createBaseState() {
     settings: readSettings(),
     examSelectionPending: false,
     stillPhase: "single",
+    stillPhaseArmed: false,
     celebrationPlayed: false,
   };
 }
@@ -461,6 +471,10 @@ function readSettings() {
     settings.mouthEeeGapThreshold = Math.max(
       Number(settings.mouthEeeGapThreshold) || DEFAULT_SETTINGS.mouthEeeGapThreshold,
       MOUTH_EEE_GAP_THRESHOLD_MIN,
+    );
+    settings.stillRepeatCount = Math.max(
+      1,
+      Number(settings.stillRepeatCount) || DEFAULT_SETTINGS.stillRepeatCount,
     );
     return settings;
   } catch (error) {
@@ -912,6 +926,9 @@ function scheduleVisionAdvance(state) {
 
 function syncCompletionEffects(panel, state) {
   panel.celebration.classList.toggle("hidden", !state.completed);
+  if (panel.retry) {
+    panel.retry.classList.toggle("hidden", !state.completed);
+  }
   if (state.completed && !state.celebrationPlayed) {
     state.celebrationPlayed = true;
     playSuccessFanfare();
@@ -1090,6 +1107,12 @@ function clearError() {
 function fillSettingsForm(settings) {
   ui.targetSeconds.value = String(settings.targetSeconds);
   ui.targetSecondsValue.value = String(settings.targetSeconds);
+  if (ui.stillRepeatCount) {
+    ui.stillRepeatCount.value = String(settings.stillRepeatCount || DEFAULT_SETTINGS.stillRepeatCount);
+  }
+  if (ui.stillRepeatCountValue) {
+    ui.stillRepeatCountValue.value = String(settings.stillRepeatCount || DEFAULT_SETTINGS.stillRepeatCount);
+  }
   ui.ecgTargetSeconds.value = String(settings.ecgTargetSeconds);
   ui.ecgTargetSecondsValue.value = String(settings.ecgTargetSeconds);
   ui.mouthThreshold.value = String(settings.mouthThreshold);
@@ -1138,6 +1161,7 @@ function resolveStillPromptImage(settings, pendingValue) {
 
 function applyTeacherSettingsLabels() {
   setFieldLabel(ui.targetSeconds, "静止秒数");
+  setFieldLabel(ui.stillRepeatCount, "ピタッとポーズ 回数");
   setFieldLabel(ui.ecgTargetSeconds, "心電図 静止秒数");
   setFieldLabel(ui.mouthThreshold, "アー 縦開きしきい値");
   setFieldLabel(ui.mouthEeeWidthThreshold, "イー 横広がりしきい値");
@@ -1183,6 +1207,10 @@ function setCheckboxLabel(input, text) {
 function readSettingsForm() {
   return {
     targetSeconds: Number(ui.targetSeconds.value) || DEFAULT_SETTINGS.targetSeconds,
+    stillRepeatCount: Math.max(
+      1,
+      Number((ui.stillRepeatCount && ui.stillRepeatCount.value) || DEFAULT_SETTINGS.stillRepeatCount),
+    ),
     ecgTargetSeconds: Number(ui.ecgTargetSeconds.value) || DEFAULT_SETTINGS.ecgTargetSeconds,
     mouthThreshold: Number(ui.mouthThreshold.value) || DEFAULT_SETTINGS.mouthThreshold,
     mouthMode: readSettings().mouthMode || DEFAULT_SETTINGS.mouthMode,
@@ -1218,6 +1246,7 @@ function syncSettingsVisibility(settings) {
   const hearingMode = settings.hearingMode || DEFAULT_SETTINGS.hearingMode;
 
   toggleHidden(ui.settingFields.targetSeconds, !(isMouthMode || (isStillMode && examType !== "shindenzu")));
+  toggleHidden(ui.settingFields.stillRepeatCount, !isStillMode);
   toggleHidden(ui.settingFields.ecgTargetSeconds, !(isStillMode && examType === "shindenzu"));
   toggleHidden(ui.settingFields.mouthThreshold, !isMouthMode);
   toggleHidden(ui.settingFields.mouthEeeWidthThreshold, !isMouthMode);
@@ -1472,6 +1501,7 @@ function stopMode(mode, keepVisualState) {
     state.completed = false;
     state.statusMessage = "";
     state.stillPhase = "single";
+    state.stillPhaseArmed = false;
     if (mode === "hearing") {
       resetHearingState(state);
     }
@@ -1487,9 +1517,18 @@ function restartCurrentMode() {
     return;
   }
 
-  stopMode(currentMode, false);
+  restartMode(currentMode);
+}
+
+function restartMode(mode) {
+  if (!mode || mode === "home") {
+    renderAll();
+    return;
+  }
+
+  stopMode(mode, false);
   renderAll();
-  window.setTimeout(() => startMode(currentMode), 0);
+  window.setTimeout(() => startMode(mode), 0);
 }
 
 function resetAllProgress() {
@@ -1560,9 +1599,9 @@ function mouthActive(state) {
 
 function getStillTotalSeconds(state) {
   if (state.settings.examType === "jibika") {
-    return getStillTargetSeconds(state) * 2;
+    return getStillTargetSeconds(state) * 2 * getStillRepeatCount(state);
   }
-  return getStillTargetSeconds(state);
+  return getStillTargetSeconds(state) * getStillRepeatCount(state);
 }
 
 function getStillTargetSeconds(state) {
@@ -1571,13 +1610,69 @@ function getStillTargetSeconds(state) {
     : Number(state.settings.targetSeconds || DEFAULT_SETTINGS.targetSeconds);
 }
 
-function getStillPhaseSeconds(state) {
+function getStillRepeatCount(state) {
+  return Math.max(1, Number(state.settings.stillRepeatCount || DEFAULT_SETTINGS.stillRepeatCount));
+}
+
+function getStillPhasesPerRound(state) {
+  return state.settings.examType === "jibika" ? 2 : 1;
+}
+
+function getStillTotalPhases(state) {
+  return getStillRepeatCount(state) * getStillPhasesPerRound(state);
+}
+
+function getStillPhaseIndex(state) {
+  const targetSeconds = Math.max(getStillTargetSeconds(state), 0.1);
+  const totalPhases = Math.max(getStillTotalPhases(state), 1);
+  return Math.min(Math.floor(Math.max(state.progressSeconds, 0) / targetSeconds), totalPhases - 1);
+}
+
+function getStillPhaseStartSeconds(state) {
+  return getStillPhaseIndex(state) * getStillTargetSeconds(state);
+}
+
+function getStillPhaseType(state) {
   if (state.settings.examType !== "jibika") {
-    return state.progressSeconds;
+    return "single";
   }
-  return state.stillPhase === "front"
-    ? Math.min(state.progressSeconds, getStillTargetSeconds(state))
-    : Math.max(0, state.progressSeconds - getStillTargetSeconds(state));
+  return getStillPhaseIndex(state) < getStillRepeatCount(state) ? "ear" : "front";
+}
+
+function getStillRoundIndex(state) {
+  if (state.settings.examType === "jibika") {
+    return (getStillPhaseIndex(state) % getStillRepeatCount(state)) + 1;
+  }
+  return Math.floor(getStillPhaseIndex(state) / getStillPhasesPerRound(state)) + 1;
+}
+
+function getStillStepLabel(state) {
+  const examType = state.settings.examType || DEFAULT_SETTINGS.examType;
+  const phaseType = getStillPhaseType(state);
+  if (examType === "jibika") {
+    return phaseType === "ear" ? "みみ" : "はな";
+  }
+  if (examType === "ganka") {
+    return getStillRoundIndex(state) % 2 === 1 ? "ひだり" : "みぎ";
+  }
+  if (examType === "shindenzu") {
+    return "しんでんず";
+  }
+  return "ポーズ";
+}
+
+function getStillStartButtonLabel(state) {
+  const round = getStillRoundIndex(state);
+  const repeat = getStillRepeatCount(state);
+  const roundText = repeat > 1 ? " " + round + " / " + repeat + " 回" : "";
+  return getStillStepLabel(state) + roundText + " を はじめる";
+}
+
+function getStillPhaseSeconds(state) {
+  if (state.completed) {
+    return getStillTargetSeconds(state);
+  }
+  return Math.max(0, Math.min(getStillTargetSeconds(state), state.progressSeconds - getStillPhaseStartSeconds(state)));
 }
 
 function isStillFrontFacing(state) {
@@ -1603,7 +1698,7 @@ function stillActive(state) {
     return false;
   }
   if (examType === "jibika") {
-    if (state.stillPhase === "front") {
+    if (getStillPhaseType(state) === "front") {
       return movementOk;
     }
     return movementOk && isStillEarFacing(state);
@@ -1822,44 +1917,46 @@ function tickMode(mode, now) {
     return;
   }
 
-  if (mode === "still" && state.settings.examType === "jibika") {
+  if (mode === "still") {
     const active = stillActive(state);
-    const phaseSeconds = getStillTargetSeconds(state);
     const totalSeconds = getStillTotalSeconds(state);
 
     if (!state.lastTickAt) {
       state.lastTickAt = now;
     }
 
-    if (state.stillPhase === "front") {
-      if (active && !state.completed) {
-        state.progressSeconds += (now - state.lastTickAt) / 1000;
-        if (state.progressSeconds >= phaseSeconds) {
-          state.progressSeconds = phaseSeconds;
-          state.stillPhase = "ear";
-        }
-      } else if (!state.completed) {
-        state.progressSeconds = 0;
-      }
-    } else {
-      if (active && !state.completed) {
-        state.progressSeconds += (now - state.lastTickAt) / 1000;
-        if (state.progressSeconds >= totalSeconds) {
-          state.progressSeconds = totalSeconds;
-          state.completed = true;
-        }
-      } else if (!state.completed) {
-        state.progressSeconds = phaseSeconds;
-      }
+    if (!state.stillPhaseArmed || state.completed) {
+      state.lastTickAt = now;
+      renderAll();
+      state.rafId = requestAnimationFrame((nextNow) => tickMode(mode, nextNow));
+      return;
     }
 
+    if (active) {
+      const currentPhaseStartSeconds = getStillPhaseStartSeconds(state);
+      const nextPhaseStartSeconds = currentPhaseStartSeconds + getStillTargetSeconds(state);
+      state.progressSeconds += (now - state.lastTickAt) / 1000;
+      if (state.progressSeconds >= nextPhaseStartSeconds && nextPhaseStartSeconds < totalSeconds) {
+        state.progressSeconds = nextPhaseStartSeconds;
+        state.stillPhaseArmed = false;
+      }
+      if (state.progressSeconds >= totalSeconds) {
+        state.progressSeconds = totalSeconds;
+        state.completed = true;
+        state.stillPhaseArmed = false;
+      }
+    } else {
+      state.progressSeconds = getStillPhaseStartSeconds(state);
+    }
+
+    state.stillPhase = getStillPhaseType(state);
     state.lastTickAt = now;
     renderAll();
     state.rafId = requestAnimationFrame((nextNow) => tickMode(mode, nextNow));
     return;
   }
 
-  const active = mode === "mouth" ? mouthActive(state) : stillActive(state);
+  const active = mouthActive(state);
 
   if (!state.lastTickAt) {
     state.lastTickAt = now;
@@ -1867,7 +1964,7 @@ function tickMode(mode, now) {
 
   if (active && !state.completed) {
     state.progressSeconds += (now - state.lastTickAt) / 1000;
-    const targetSeconds = mode === "still" ? getStillTargetSeconds(state) : state.settings.targetSeconds;
+    const targetSeconds = state.settings.targetSeconds;
     if (state.progressSeconds >= targetSeconds) {
       state.progressSeconds = targetSeconds;
       state.completed = true;
@@ -1893,9 +1990,13 @@ function updateProgress(panel, state) {
 
 function updateProgressV2(panel, state) {
   const total = Math.max(state === modeStates.still ? getStillTargetSeconds(state) : state.settings.targetSeconds, 0.1);
-  const progressValue = state === modeStates.still && state.settings.examType === "jibika" ? getStillPhaseSeconds(state) : state.progressSeconds;
+  const progressValue = state === modeStates.still ? getStillPhaseSeconds(state) : state.progressSeconds;
   const percent = Math.max(0, Math.min(100, Math.round((progressValue / total) * 100)));
-  setText(panel.progressLabel, percent + "%");
+  if (state === modeStates.still && getStillRepeatCount(state) > 1) {
+    setText(panel.progressLabel, getStillRoundIndex(state) + " / " + getStillRepeatCount(state) + " 回 " + percent + "%");
+  } else {
+    setText(panel.progressLabel, percent + "%");
+  }
   setText(panel.timerLabel, progressValue.toFixed(1) + " / " + total + " 秒");
   setWidth(panel.progressFill, percent + "%");
   syncCompletionEffects(panel, state);
@@ -2015,6 +2116,7 @@ function renderStillV4() {
   const isMock = state.snapshot?.source === "mock";
   const active = stillActive(state);
   const examType = state.settings.examType || DEFAULT_SETTINGS.examType;
+  state.stillPhase = getStillPhaseType(state);
 
   ui.stillExamChooser.classList.toggle("hidden", !state.examSelectionPending);
   ui.stillLayout.classList.toggle("hidden", state.examSelectionPending);
@@ -2024,18 +2126,20 @@ function renderStillV4() {
 
   renderStillGuideFrame(examType, state.stillPhase);
   setText(ui.still.providerChip, state.loading ? "じゅんびちゅう" : state.snapshot?.providerLabel || "じゅんびOK");
-  setText(ui.still.providerHelp, "");
+  setText(ui.still.providerHelp, state.stillPhaseArmed || state.completed ? "" : "じゅんびができたら、はじめるボタンをおしてください。");
   setText(ui.still.cameraState, hasFace ? "かめら OK" : "かおまち");
   setText(ui.still.cameraHelp, "かおを わくに あわせてください。");
   setText(
     ui.still.detectorState,
-    state.completed ? "できた" : !hasFace ? "かおまち" : active ? "じっとできた" : isMock ? "れんしゅう" : "うごき中",
+    state.completed ? "できた" : !state.stillPhaseArmed ? "たいき" : !hasFace ? "かおまち" : active ? "じっとできた" : isMock ? "れんしゅう" : "うごき中",
   );
   setText(
     ui.still.promptText,
     state.completed
       ? SUCCESS_MESSAGE
-      : !hasFace
+      : !state.stillPhaseArmed
+        ? getStillStartButtonLabel(state) + "。"
+        : !hasFace
         ? "かおを わくに あわせてください。"
         : active
           ? "そのまま きーぷ。"
@@ -2044,6 +2148,10 @@ function renderStillV4() {
             : "じっと してみよう。",
   );
   setText(ui.still.scoreLabel, "うごき " + score.toFixed(4) + " / " + Number(state.settings.stillThreshold).toFixed(4));
+  if (ui.still.phaseStart) {
+    ui.still.phaseStart.classList.toggle("hidden", state.completed || state.stillPhaseArmed);
+    setText(ui.still.phaseStart, getStillStartButtonLabel(state));
+  }
   ui.still.manualTrigger.classList.toggle("hidden", !isMock);
   updateProgressV2(ui.still, state);
 }
@@ -2061,17 +2169,40 @@ function renderStillV5() {
   const phaseSeconds = getStillPhaseSeconds(state);
   const phasePercent = Math.max(0, Math.min(100, Math.round((phaseSeconds / Math.max(state.settings.targetSeconds, 0.1)) * 100)));
 
-  if (state.stillPhase === "front") {
+  const phaseType = getStillPhaseType(state);
+  const roundLabel = getStillRepeatCount(state) > 1 ? " " + getStillRoundIndex(state) + " / " + getStillRepeatCount(state) + " 回" : "";
+
+  if (phaseType === "front") {
     setText(ui.still.cameraHelp, "まず まっすぐ がめんを みよう。");
-    setText(ui.still.detectorState, active ? "はな OK" : !hasFace ? "かおまち" : "正面まち");
-    setText(ui.still.promptText, state.completed ? SUCCESS_MESSAGE : active ? "そのまま きーぷ。" : "まず まっすぐ がめんを みよう。");
+    setText(ui.still.detectorState, !state.stillPhaseArmed ? "たいき" : active ? "はな OK" : !hasFace ? "かおまち" : "正面まち");
+    setText(
+      ui.still.promptText,
+      state.completed
+        ? SUCCESS_MESSAGE
+        : !state.stillPhaseArmed
+          ? getStillStartButtonLabel(state) + "。"
+          : active
+            ? "そのまま きーぷ。"
+            : "まず まっすぐ がめんを みよう。",
+    );
   } else {
     setText(ui.still.cameraHelp, "よこを むいて みみを みせよう。");
-    setText(ui.still.detectorState, active ? "みみ OK" : !hasFace ? "かおまち" : !earFacing ? "横向き NG" : "うごき中");
-    setText(ui.still.promptText, state.completed ? SUCCESS_MESSAGE : active ? "そのまま きーぷ。" : !earFacing ? "よこを むいて みみを みせよう。" : "じっと してね。");
+    setText(ui.still.detectorState, !state.stillPhaseArmed ? "たいき" : active ? "みみ OK" : !hasFace ? "かおまち" : !earFacing ? "横向き NG" : "うごき中");
+    setText(
+      ui.still.promptText,
+      state.completed
+        ? SUCCESS_MESSAGE
+        : !state.stillPhaseArmed
+          ? getStillStartButtonLabel(state) + "。"
+          : active
+            ? "そのまま きーぷ。"
+            : !earFacing
+              ? "よこを むいて みみを みせよう。"
+              : "じっと してね。",
+    );
   }
   setText(ui.still.scoreLabel, "うごき " + score.toFixed(4) + " / " + Number(state.settings.stillThreshold).toFixed(4) + " | みみ: " + (earFacing ? "OK" : "NG"));
-  setText(ui.still.progressLabel, (state.stillPhase === "front" ? "はな" : "みみ") + " " + phasePercent + "%");
+  setText(ui.still.progressLabel, (phaseType === "front" ? "はな" : "みみ") + roundLabel + " " + phasePercent + "%");
   setText(ui.still.timerLabel, phaseSeconds.toFixed(1) + " / " + state.settings.targetSeconds + " 秒");
   setWidth(ui.still.progressFill, phasePercent + "%");
 }
@@ -2093,16 +2224,18 @@ function renderStillV6() {
 
   ui.still.heartFaceFrame.classList.add("hidden");
   setText(ui.still.cameraHelp, "あたまと あし 2かしょが、さんかくの しるしに はいるように よこになりましょう。");
-  setText(ui.still.detectorState, active ? "わく OK" : !hasFace ? "かおまち" : !bodyInFrame ? "わく外" : "うごき中");
+  setText(ui.still.detectorState, !state.stillPhaseArmed ? "たいき" : active ? "わく OK" : !hasFace ? "かおまち" : !bodyInFrame ? "わく外" : "うごき中");
   setText(
     ui.still.promptText,
     state.completed
       ? SUCCESS_MESSAGE
-      : active
-        ? "そのまま きーぷ。"
-        : !bodyInFrame
-          ? "あたまと あし 2かしょを、さんかくの しるしに あわせよう。"
-          : "3つの てんを そのまま きーぷしよう。",
+      : !state.stillPhaseArmed
+        ? getStillStartButtonLabel(state) + "。"
+        : active
+          ? "そのまま きーぷ。"
+          : !bodyInFrame
+            ? "あたまと あし 2かしょを、さんかくの しるしに あわせよう。"
+            : "3つの てんを そのまま きーぷしよう。",
   );
   setText(
     ui.still.scoreLabel,
@@ -2308,7 +2441,8 @@ async function startMode(mode) {
   state.completed = false;
   state.lastTickAt = 0;
   state.settings = readSettings();
-  state.stillPhase = state.settings.examType === "jibika" ? "front" : "single";
+  state.stillPhase = state.settings.examType === "jibika" ? "ear" : "single";
+  state.stillPhaseArmed = false;
   if (mode === "hearing") {
     resetHearingState(state);
   }
@@ -2438,6 +2572,11 @@ function installEvents() {
     closeSettings();
     resetAllProgress();
   });
+  document.querySelectorAll("[data-retry-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      restartMode(button.dataset.retryMode || currentMode);
+    });
+  });
   ui.vision.answerButtons.forEach((button) => {
     button.addEventListener("click", () => {
       modeStates.vision.selectedAnswer = button.dataset.answer || "";
@@ -2462,6 +2601,14 @@ function installEvents() {
     ui.stillImage.value = "";
     updateStillImagePreview(getDefaultStillPromptImage(readSettings().examType || DEFAULT_SETTINGS.examType));
   });
+  if (ui.still.phaseStart) {
+    ui.still.phaseStart.addEventListener("click", () => {
+      const state = modeStates.still;
+      state.stillPhaseArmed = true;
+      state.lastTickAt = 0;
+      renderAll();
+    });
+  }
   ui.hearing.touchpad.addEventListener("click", handleHearingTouch);
   if (ui.hearingMode) {
     ui.hearingMode.addEventListener("change", () => {
@@ -2491,6 +2638,7 @@ function installEvents() {
     });
   });
   bindSlider(ui.targetSeconds, ui.targetSecondsValue, 0);
+  bindSlider(ui.stillRepeatCount, ui.stillRepeatCountValue, 0);
   bindSlider(ui.ecgTargetSeconds, ui.ecgTargetSecondsValue, 0);
   bindSlider(ui.mouthThreshold, ui.mouthThresholdValue, 2);
   bindSlider(ui.mouthEeeWidthThreshold, ui.mouthEeeWidthThresholdValue, 2);
@@ -2531,7 +2679,7 @@ function init() {
   updateNetworkStatus();
   updateCacheStatus();
   installEvents();
-  clearServiceWorkerCaches();
+  registerServiceWorker();
   initFromHash();
 }
 

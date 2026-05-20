@@ -7,28 +7,10 @@
     <title>ピタッとけんしん</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
-    <script>
-      (function () {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function (registrations) {
-            registrations.forEach(function (registration) {
-              registration.unregister();
-            });
-          });
-        }
-        if ("caches" in window) {
-          caches.keys().then(function (keys) {
-            keys.forEach(function (key) {
-              caches.delete(key);
-            });
-          });
-        }
-      })();
-    </script>
-    <script defer src="./app.js?build=v110"></script>
+    <script defer src="./app.js?build=v115"></script>
   </head>
   <body>
-    <div class="debug-build-badge">Version 1.10</div>
+    <div class="debug-build-badge">Version 1.10.5</div>
     <div class="app-shell">
       <section id="home-screen" class="screen">
         <header class="hero home-hero">
@@ -180,11 +162,13 @@
             </div>
             <p id="still-prompt-text" class="prompt-text">じっと してください。</p>
             <p id="still-score-label" class="ratio-label">うごき: 0.000 / 0.018</p>
+            <button id="still-phase-start" class="primary-button" type="button">はじめる</button>
             <button id="still-manual-trigger" class="manual-trigger hidden" type="button">ぼたんを おして じっとする</button>
             <div id="still-celebration" class="celebration hidden">
               <div class="confetti-layer"></div>
               <span>じょうずに できた すごい！</span>
             </div>
+            <button class="secondary-button retry-button hidden" type="button" data-retry-mode="still">もういちど やってみる</button>
           </section>
 
           <section class="card">
@@ -253,6 +237,7 @@
               <div class="confetti-layer"></div>
               <span>じょうずに できた すごい！</span>
             </div>
+            <button class="secondary-button retry-button hidden" type="button" data-retry-mode="mouth">もういちど やってみる</button>
           </section>
 
           <section class="card">
@@ -329,6 +314,7 @@
               <div class="confetti-layer"></div>
               <span>じょうずに できた すごい！</span>
             </div>
+            <button class="secondary-button retry-button hidden" type="button" data-retry-mode="vision">もういちど やってみる</button>
           </section>
 
           <section class="card">
@@ -387,6 +373,7 @@
               <div class="confetti-layer"></div>
               <span>じょうずに できた すごい！</span>
             </div>
+            <button class="secondary-button retry-button hidden" type="button" data-retry-mode="hearing">もういちど やってみる</button>
           </section>
 
           <section class="card">
@@ -475,6 +462,12 @@
           <span>きーぷ じかん</span>
           <input id="setting-target-seconds" type="range" min="2" max="10" step="1" value="5" />
           <output id="setting-target-seconds-value">5</output>
+        </label>
+
+        <label class="field">
+          <span>ピタッとポーズ 回数</span>
+          <input id="setting-still-repeat-count" type="range" min="1" max="6" step="1" value="1" />
+          <output id="setting-still-repeat-count-value">1</output>
         </label>
 
         <label class="field">
