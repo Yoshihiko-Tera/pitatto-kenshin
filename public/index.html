@@ -7,10 +7,10 @@
     <title>ピタッとけんしん</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
-    <script defer src="./app.js?build=v115"></script>
+    <script defer src="./app.js?build=v116"></script>
   </head>
   <body>
-    <div class="debug-build-badge">Version 1.10.5</div>
+    <div class="debug-build-badge">Version 1.10.6</div>
     <div class="app-shell">
       <section id="home-screen" class="screen">
         <header class="hero home-hero">
@@ -137,6 +137,9 @@
             <div class="card-heading">
               <h2>かお</h2>
               <span id="still-camera-state" class="status-chip">かめら じゅんびちゅう</span>
+            </div>
+            <div id="still-camera-controls" class="camera-control-row hidden">
+              <button id="still-camera-switch" class="secondary-button camera-switch-button" type="button">外カメラにする</button>
             </div>
             <div class="camera-stack">
               <video id="still-camera" class="camera-feed" autoplay muted playsinline></video>

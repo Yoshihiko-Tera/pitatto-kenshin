@@ -1,6 +1,6 @@
 ﻿window.__appModuleLoaded = true;
 
-const CACHE_NAME = "kenshin-dekitayo-v115";
+const CACHE_NAME = "kenshin-dekitayo-v116";
 const SETTINGS_KEY = "kenshin-dekitayo.settings";
 const MOUTH_EEE_GAP_THRESHOLD_MIN = 0.1;
 const SUCCESS_MESSAGE = "じょうずに できた すごい！";
@@ -138,6 +138,8 @@ const ui = {
     cameraState: document.getElementById("still-camera-state"),
     cameraHelp: document.getElementById("still-camera-help"),
     cameraMask: document.getElementById("still-camera-mask"),
+    cameraControls: document.getElementById("still-camera-controls"),
+    cameraSwitch: document.getElementById("still-camera-switch"),
     heartFaceFrame: document.getElementById("still-heart-face-frame"),
     guideFrame: document.querySelector("#still-screen .guide-frame"),
     guideBody: document.querySelector("#still-screen .guide-body"),
@@ -228,6 +230,8 @@ const modeStates = {
 
 let currentMode = "home";
 let sharedCameraStream = null;
+let sharedCameraFacingMode = "";
+let preferredEcgFacingMode = "environment";
 let pendingStillImageDataUrl = null;
 let audioContext = null;
 
@@ -1436,6 +1440,45 @@ function cameraPanels() {
   };
 }
 
+function getCameraFacingMode(mode) {
+  const state = modeStates[mode];
+  if (mode === "still" && state?.settings?.examType === "shindenzu") {
+    return preferredEcgFacingMode;
+  }
+  return "user";
+}
+
+function stopSharedCamera() {
+  if (sharedCameraStream) {
+    sharedCameraStream.getTracks().forEach((track) => track.stop());
+  }
+  sharedCameraStream = null;
+  sharedCameraFacingMode = "";
+  Object.values(cameraPanels()).forEach((target) => {
+    if (target.video) {
+      target.video.srcObject = null;
+    }
+  });
+}
+
+function syncCameraMirror() {
+  const isUnmirrored = sharedCameraFacingMode === "environment";
+  Object.values(cameraPanels()).forEach((target) => {
+    target.video?.classList.toggle("camera-feed-unmirrored", isUnmirrored);
+  });
+}
+
+function syncStillCameraControls() {
+  const state = modeStates.still;
+  const isEcg = state.settings.examType === "shindenzu" && !state.examSelectionPending;
+  ui.still.cameraControls?.classList.toggle("hidden", !isEcg);
+  if (!ui.still.cameraSwitch) {
+    return;
+  }
+  ui.still.cameraSwitch.textContent = preferredEcgFacingMode === "environment" ? "内カメラにする" : "外カメラにする";
+  ui.still.cameraSwitch.setAttribute("aria-pressed", preferredEcgFacingMode === "environment" ? "true" : "false");
+}
+
 async function ensureCamera(mode) {
   const panel = cameraPanels()[mode];
   if (!panel || !panel.video) {
@@ -1449,15 +1492,21 @@ async function ensureCamera(mode) {
   }
 
   try {
+    const facingMode = getCameraFacingMode(mode);
+    if (sharedCameraStream && sharedCameraFacingMode !== facingMode) {
+      stopSharedCamera();
+    }
     if (!sharedCameraStream) {
       sharedCameraStream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: "user",
+          facingMode: { ideal: facingMode },
           width: { ideal: 640 },
           height: { ideal: 480 },
         },
       });
+      const videoTrack = sharedCameraStream.getVideoTracks()[0];
+      sharedCameraFacingMode = videoTrack?.getSettings?.().facingMode || facingMode;
     }
 
     Object.values(cameraPanels()).forEach((target) => {
@@ -1465,6 +1514,7 @@ async function ensureCamera(mode) {
         target.video.srcObject = sharedCameraStream;
       }
     });
+    syncCameraMirror();
 
     setText(panel.cameraState, "かめら OK");
     setText(panel.cameraHelp, "かおが わくに おさまるように して ください。");
@@ -1509,6 +1559,21 @@ function stopMode(mode, keepVisualState) {
       resetVisionProgressState(state);
     }
   }
+}
+
+async function switchStillCamera() {
+  const state = modeStates.still;
+  if (state.settings.examType !== "shindenzu" || state.examSelectionPending) {
+    return;
+  }
+
+  preferredEcgFacingMode = preferredEcgFacingMode === "environment" ? "user" : "environment";
+  stopMode("still", false);
+  stopSharedCamera();
+  syncStillCameraControls();
+  renderAll();
+  await ensureCamera("still");
+  await startMode("still");
 }
 
 function restartCurrentMode() {
@@ -2120,6 +2185,7 @@ function renderStillV4() {
 
   ui.stillExamChooser.classList.toggle("hidden", !state.examSelectionPending);
   ui.stillLayout.classList.toggle("hidden", state.examSelectionPending);
+  syncStillCameraControls();
   if (state.examSelectionPending) {
     return;
   }
@@ -2609,6 +2675,9 @@ function installEvents() {
       renderAll();
     });
   }
+  ui.still.cameraSwitch?.addEventListener("click", () => {
+    switchStillCamera().catch(showError);
+  });
   ui.hearing.touchpad.addEventListener("click", handleHearingTouch);
   if (ui.hearingMode) {
     ui.hearingMode.addEventListener("change", () => {
@@ -2629,6 +2698,9 @@ function installEvents() {
   ui.stillExamChoiceButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const examType = button.dataset.examChoice || DEFAULT_SETTINGS.examType;
+      if (examType === "shindenzu") {
+        preferredEcgFacingMode = "environment";
+      }
       const nextSettings = { ...readSettings(), examType };
       saveSettings(nextSettings);
       pendingStillImageDataUrl = null;

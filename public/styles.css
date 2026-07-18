@@ -345,6 +345,24 @@ select {
   transform: scaleX(-1);
 }
 
+.camera-feed.camera-feed-unmirrored {
+  transform: none;
+}
+
+.camera-control-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.camera-switch-button {
+  width: auto;
+  min-height: 2.75rem;
+  margin-top: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 16px;
+}
+
 .camera-mask {
   display: grid;
   place-items: center;
