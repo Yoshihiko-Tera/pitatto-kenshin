@@ -1,7 +1,10 @@
 {
   "name": "ピタッとけんしん",
   "short_name": "ピタッとけんしん",
-  "start_url": "./",
+  "description": "学校健診で行う姿勢や動作を楽しく練習できるWebアプリ",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#d9f99d",
   "theme_color": "#0f766e",

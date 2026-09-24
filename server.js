@@ -14,6 +14,8 @@ const contentTypes = {
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
   ".task": "application/octet-stream",
   ".wasm": "application/wasm",
   ".webmanifest": "application/manifest+json; charset=utf-8",

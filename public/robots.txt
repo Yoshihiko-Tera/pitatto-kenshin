@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pitatto-kenshin-43w.pages.dev/sitemap.xml
