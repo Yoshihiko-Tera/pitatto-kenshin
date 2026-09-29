@@ -1,9 +1,9 @@
-const CACHE_NAME = "kenshin-dekitayo-v116";
+const CACHE_NAME = "kenshin-dekitayo-v117";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
-  "./app.js?build=v116",
+  "./app.js?build=v117",
   "./assets/top-hero-doctor.png",
   "./assets/course-still-mouth.png",
   "./assets/course-vision.png",
@@ -25,7 +25,10 @@ const APP_ASSETS = [
   "./detectors/mock-still-detector.js",
   "./detectors/mock-vision-detector.js",
   "./manifest.webmanifest",
-  "./icon.svg",
+  "./icon-v2.svg",
+  "./icon-192-v3.png",
+  "./icon-512-v3.png",
+  "./apple-touch-icon-v3.png",
   "./vendor/mediapipe/face_landmarker.task",
   "./vendor/mediapipe/vision_bundle.mjs",
   "./vendor/mediapipe/wasm/vision_wasm_internal.js",
