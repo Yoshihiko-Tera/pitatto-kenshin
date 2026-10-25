@@ -1,5 +1,6 @@
-const CACHE_NAME = "kenshin-dekitayo-v117";
+const CACHE_NAME = "kenshin-dekitayo-v117-about1";
 const APP_ASSETS = [
+  "./about.html",
   "./",
   "./index.html",
   "./styles.css",
@@ -72,10 +73,11 @@ self.addEventListener("fetch", (event) => {
       fetch(event.request)
         .then((response) => {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", responseClone));
+          const cacheKey = normalizedPath === "/" || normalizedPath === "/index.html" ? "./index.html" : event.request;
+          caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, responseClone));
           return response;
         })
-        .catch(() => caches.match("./index.html")),
+        .catch(() => caches.match(normalizedPath === "/" || normalizedPath === "/index.html" ? "./index.html" : event.request)),
     );
     return;
   }
