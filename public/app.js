@@ -1,6 +1,6 @@
 ﻿window.__appModuleLoaded = true;
 
-const CACHE_NAME = "kenshin-dekitayo-v117";
+const CACHE_NAME = "kenshin-dekitayo-v122";
 const SETTINGS_KEY = "kenshin-dekitayo.settings";
 const MOUTH_EEE_GAP_THRESHOLD_MIN = 0.1;
 const SUCCESS_MESSAGE = "じょうずに できた すごい！";
@@ -54,7 +54,7 @@ const HEARING_CUE_DELAY_MAX_MS = 2600;
 const HEARING_RESPONSE_WINDOW_MS = 3000;
 const HEARING_TOUCH_GUARD_MS = 3000;
 const HEARING_SEQUENCE_FREQUENCIES = [125, 250, 500, 1000, 2000, 4000, 8000];
-const SCREEN_NAMES = ["home", "mouth", "still", "vision", "hearing", "hearing-preview-list"];
+const SCREEN_NAMES = ["home", "mouth", "still", "vision", "hearing", "hearing-preview-list", "color-vision"];
 
 const ui = {
   appError: document.getElementById("app-error"),
@@ -1622,6 +1622,7 @@ function openMode(mode) {
     }
   });
 
+  if (mode === "color-vision") { window.location.hash = "#color-vision"; return; }
   if (mode === "home") {
     window.location.hash = "#home";
     return;
@@ -2757,3 +2758,8 @@ function init() {
 
 init();
 
+
+let colorVisionSession;
+document.getElementById('start-color-vision-mode').addEventListener('click', async () => {
+ try { const {createSession} = await import('./color-vision/session-controller.js'); colorVisionSession ??= createSession(() => openMode('home')); openMode('color-vision'); colorVisionSession.showIntro(); } catch(error) { showError(error); }
+});

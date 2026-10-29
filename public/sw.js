@@ -1,10 +1,17 @@
-const CACHE_NAME = "kenshin-dekitayo-v117-about1";
+const CACHE_NAME = "kenshin-dekitayo-v122";
 const APP_ASSETS = [
+  "./assets/course-color-vision.png",
+  "./color-vision/course.css?v122",
+  "./color-vision/question-generator.js",
+  "./color-vision/session-controller.js",
+  "./color-vision/plate-renderer.js",
+  "./color-vision/shape-mask.js",
+  "./color-vision/palette-registry.js",
   "./about.html",
   "./",
   "./index.html",
   "./styles.css",
-  "./app.js?build=v117",
+  "./app.js?build=v122",
   "./assets/top-hero-doctor.png",
   "./assets/course-still-mouth.png",
   "./assets/course-vision.png",

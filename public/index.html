@@ -49,10 +49,10 @@
       }
     </script>
     <link rel="stylesheet" href="./styles.css" />
-    <script defer src="./app.js?build=v117"></script>
-  </head>
+    <script defer src="./app.js?build=v122"></script>
+  <link rel="stylesheet" href="./color-vision/course.css?v122"></head>
   <body>
-    <div class="debug-build-badge">Version 1.10.7</div>
+    <div class="debug-build-badge">Version 1.11.0</div>
     <div class="app-shell">
       <section id="home-screen" class="screen">
         <header class="hero home-hero">
@@ -150,11 +150,16 @@
             </div>
             <button id="start-hearing-mode" class="primary-button" type="button">聴力コースを開始</button>
           </section>
-        </main>
+<section class="card mode-card mode-card-active"><div class="course-card-layout"><div class="course-card-copy"><p class="mode-badge">色覚検査の練習</p><h2 class="course-title"><span class="course-title-icon" aria-hidden="true">🎨</span><span>なにが<br />みえる？</span></h2><p class="support-text">色の丸の中の数字や、輪の開いている向きを選ぶ練習です。</p><ul class="course-list"><li>数字8問・向き4問</li><li>わからないでもOK</li></ul></div><div class="course-card-art course-card-art-side"><img class="course-card-art-image" src="./assets/course-color-vision.png" alt="先生と児童が色の丸の図柄を確認するイラスト" /></div></div><button id="start-color-vision-mode" class="primary-button" type="button">色覚検査の練習を開始</button></section></main>
         <footer class="home-about-footer" style="text-align:center;padding:16px 16px 28px"><a href="about.html" style="font-size:14px;color:#536d67;text-underline-offset:4px;display:inline-block;padding:12px">使い方・アプリについて</a></footer>
       </section>
 
-      <section id="still-screen" class="screen hidden">
+<section id="color-vision-screen" class="screen hidden"><header class="hero"><button data-cv-home class="back-button" type="button">もどる</button><h1 tabindex="-1">なにが みえる？</h1><p class="hero-copy">色覚検査の流れを練習します。</p></header><div class="card cv-content">
+<div data-cv-intro><h2>いろの まるを みてみよう</h2><p>みえる すうじや、わっかの むきを えらぼう。<br>わからない ときは「わからない」で いいよ。</p><p>ぜんぶで 12もん。じかんせいげんは ありません。</p><p class="cv-note">先生へ：口頭で答えてから、先生が選択して進めることもできます。<br>検査の流れに慣れるための練習です。仮色を使用しており、診断・色覚評価には使用できません。</p><button data-cv-start class="primary-button" type="button">はじめる</button></div>
+<div data-cv-practice hidden><p data-cv-progress class="cv-progress" aria-live="polite"></p><h2 data-cv-prompt tabindex="-1"></h2><canvas aria-label="色の丸の練習図柄"></canvas><div data-cv-answers class="cv-answers" aria-label="こたえを えらぼう"></div></div>
+<div data-cv-error hidden role="alert"></div><button data-cv-error-retry class="secondary-button" type="button" hidden>もういちど</button>
+<div data-cv-end hidden><h2 data-cv-finish tabindex="-1">れんしゅう おつかれさま！</h2><p>これで おしまいです。</p><section data-cv-review aria-label="練習のふりかえり"></section><button data-cv-retry class="primary-button" type="button">もういちど れんしゅう</button><button data-cv-home class="secondary-button" type="button">コースを えらぶ</button></div></div></section>
+<section id="still-screen" class="screen hidden">
         <header class="hero">
           <button id="back-home-still" class="back-button" type="button">もどる</button>
           <h1 class="screen-title"><span class="course-title-icon" aria-hidden="true">🩺</span><span>ピタッと<br />ポーズ！</span></h1>
