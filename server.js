@@ -7,6 +7,7 @@ const root = path.resolve("public");
 const port = Number(process.env.PORT || 4173);
 
 const contentTypes = {
+  ".pdf": "application/pdf",
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",

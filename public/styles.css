@@ -1391,3 +1391,5 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.home-about-footer{text-align:center;padding:24px 16px 28px;display:flex;flex-direction:column;align-items:center;gap:8px}.teacher-guide-link{display:inline-flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 12px;padding:14px 22px;border:1px solid #8caf9e;border-radius:14px;background:#ffffffd9;color:#115e59;font-size:16px;font-weight:700;text-decoration:none;min-height:48px}.teacher-guide-link span{font-size:12px;font-weight:400}.teacher-guide-link:hover{background:#fff}.about-page-link{font-size:14px;color:#536d67;text-underline-offset:4px;display:inline-block;padding:12px}.home-about-footer a:focus-visible{outline:3px solid #0f766e;outline-offset:4px}
