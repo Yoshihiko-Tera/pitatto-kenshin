@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import {paletteRegistry,practicePaletteIds} from '../public/color-vision/palette-registry.js';
 import {generateQuestions} from '../public/color-vision/question-generator.js';
 for(let seed=0;seed<1000;seed++){
  const questions=generateQuestions(seed),numbers=questions.slice(0,8);
+ assert.equal(new Set(questions.map(q=>q.paletteId)).size,4);
+ for(const q of questions){assert(practicePaletteIds.includes(q.paletteId));assert(!paletteRegistry[q.paletteId].introOnly);}
  assert.deepEqual(questions,generateQuestions(seed));assert.equal(questions.length,12);
  assert(numbers.every(q=>q.kind==='number'));assert.equal(numbers.filter(q=>q.value<10).length,4);
  assert.equal(new Set(numbers.map(q=>q.value)).size,8);assert(numbers.every(q=>q.value<10||q.value%11!==0));
