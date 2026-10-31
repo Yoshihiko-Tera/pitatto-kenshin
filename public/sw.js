@@ -1,17 +1,17 @@
-const CACHE_NAME = "kenshin-dekitayo-v1120";
+const CACHE_NAME = "kenshin-dekitayo-v1121";
 const APP_ASSETS = [
   "./assets/course-color-vision.png",
-  "./color-vision/course.css?v1120",
-  "./color-vision/question-generator.js",
-  "./color-vision/session-controller.js",
-  "./color-vision/plate-renderer.js",
-  "./color-vision/shape-mask.js",
-  "./color-vision/palette-registry.js",
+  "./color-vision/course.css?v1121",
+  "./color-vision/question-generator.js?v1121",
+  "./color-vision/session-controller.js?v1121",
+  "./color-vision/plate-renderer.js?v1121",
+  "./color-vision/shape-mask.js?v1121",
+  "./color-vision/palette-registry.js?v1121",
   "./about.html",
   "./",
   "./index.html",
   "./styles.css",
-  "./app.js?build=v1120",
+  "./app.js?build=v1121",
   "./assets/top-hero-doctor.png",
   "./assets/course-still-mouth.png",
   "./assets/course-vision.png",
@@ -89,7 +89,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (NETWORK_FIRST_ASSETS.has(normalizedPath)) {
+  if (NETWORK_FIRST_ASSETS.has(normalizedPath) || normalizedPath.startsWith("/color-vision/")) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

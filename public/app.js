@@ -1,6 +1,6 @@
 ﻿window.__appModuleLoaded = true;
 
-const CACHE_NAME = "kenshin-dekitayo-v1120";
+const CACHE_NAME = "kenshin-dekitayo-v1121";
 const SETTINGS_KEY = "kenshin-dekitayo.settings";
 const MOUTH_EEE_GAP_THRESHOLD_MIN = 0.1;
 const SUCCESS_MESSAGE = "じょうずに できた すごい！";
@@ -2761,5 +2761,5 @@ init();
 
 let colorVisionSession;
 document.getElementById('start-color-vision-mode').addEventListener('click', async () => {
- try { const {createSession} = await import('./color-vision/session-controller.js'); colorVisionSession ??= createSession(() => openMode('home')); openMode('color-vision'); colorVisionSession.showIntro(); } catch(error) { showError(error); }
+ try { const {createSession} = await import('./color-vision/session-controller.js?v1121'); colorVisionSession ??= createSession(() => openMode('home')); openMode('color-vision'); colorVisionSession.showIntro(); } catch(error) { showError(error); }
 });

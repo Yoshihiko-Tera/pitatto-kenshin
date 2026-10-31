@@ -1,5 +1,5 @@
-import {paletteRegistry} from './palette-registry.js';
-import{renderPlate}from'./plate-renderer.js';
+import {paletteRegistry} from './palette-registry.js?v1121';
+import{renderPlate}from'./plate-renderer.js?v1121';
 const examples=[['number',5],['number',12],['number',29],['landolt','left'],['landolt','up'],['landolt','right']],grid=document.querySelector('#plates'),status=document.querySelector('#status');
 for(const [id,palette] of Object.entries(paletteRegistry)){const option=document.createElement("option");option.value=id;option.textContent=palette.label;document.querySelector("#palette").append(option);}
 async function draw(){const seed=document.querySelector('#seed').value,density=Number(document.querySelector('#density').value),gray=document.querySelector('#gray').checked;grid.replaceChildren();status.textContent='生成中…';await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));try{for(const[index,[kind,value]]of examples.entries()){

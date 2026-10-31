@@ -1,5 +1,5 @@
-import {generateQuestions} from './question-generator.js';
-import {renderPlate} from './plate-renderer.js';
+import {generateQuestions} from './question-generator.js?v1121';
+import {renderPlate} from './plate-renderer.js?v1121';
 export function createSession(onHome){
  const root=document.querySelector('#color-vision-screen'),intro=root.querySelector('[data-cv-intro]'),practice=root.querySelector('[data-cv-practice]'),end=root.querySelector('[data-cv-end]'),answers=root.querySelector('[data-cv-answers]'),prompt=root.querySelector('[data-cv-prompt]'),progress=root.querySelector('[data-cv-progress]'),canvas=root.querySelector('canvas'),error=root.querySelector('[data-cv-error]');
  let demo=false;

@@ -1,4 +1,4 @@
-import{paletteRegistry}from'./palette-registry.js';import{shapeMask}from'./shape-mask.js';
+import{paletteRegistry}from'./palette-registry.js?v1121';import{shapeMask}from'./shape-mask.js?v1121';
 export function randomFromSeed(seed){let state=2166136261;for(const c of String(seed))state=Math.imul(state^c.charCodeAt(0),16777619);return()=>{state=(state+0x6D2B79F5)|0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
 export function generatePlate({kind,value,seed,paletteId='provisional',targetDensity=.70}){
  const start=performance.now(),random=randomFromSeed(seed),mask=shapeMask(kind,value),palette=paletteRegistry[paletteId];if(!palette||![.65,.70,.75].includes(targetDensity))throw Error('Invalid palette or density');
