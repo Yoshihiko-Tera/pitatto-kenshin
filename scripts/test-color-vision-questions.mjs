@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict';
-import {paletteRegistry,practicePaletteIds} from '../public/color-vision/palette-registry.js';
 import {generateQuestions} from '../public/color-vision/question-generator.js';
-for(let seed=0;seed<1000;seed++){
- const questions=generateQuestions(seed),numbers=questions.slice(0,8);
- assert.equal(new Set(questions.map(q=>q.paletteId)).size,4);
- for(const q of questions){assert(practicePaletteIds.includes(q.paletteId));assert(!paletteRegistry[q.paletteId].introOnly);}
- assert.deepEqual(questions,generateQuestions(seed));assert.equal(questions.length,12);
- assert(numbers.every(q=>q.kind==='number'));assert.equal(numbers.filter(q=>q.value<10).length,4);
- assert.equal(new Set(numbers.map(q=>q.value)).size,8);assert(numbers.every(q=>q.value<10||q.value%11!==0));
- assert(questions.slice(8).every(q=>q.kind==='landolt'));assert.equal(new Set(questions.slice(8).map(q=>q.value)).size,4);
- for(const q of questions){assert.equal(q.choices.length,4);assert.equal(new Set(q.choices).size,4);assert(q.choices.includes(q.value));if(q.kind==='number')assert(q.choices.every(c=>(c<10)===(q.value<10)));}
+import {paletteRegistry} from '../public/color-vision/palette-registry.js';
+const q=generateQuestions('learning');assert.equal(q.length,6);assert.deepEqual(q.map(x=>x.kind),['number','number','number','landolt','landolt','landolt']);
+for(const phase of [q.slice(0,3),q.slice(3)]){
+ assert.deepEqual(phase.map(x=>x.stage),['clear','soft','color']);assert.equal(new Set(phase.map(x=>x.value)).size,3);assert.equal(new Set(phase.map(x=>x.seed)).size,3);
+ assert.equal(phase[0].presentation,'dots');assert.equal(phase[0].paletteId,'intro-clear');assert.equal(phase[1].paletteId,'intro-mid');assert(!phase[1].soften);assert(!phase[2].soften);
+ for(const x of phase){assert.equal(x.choices.length,4);assert(x.choices.includes(x.value));assert(paletteRegistry[x.paletteId]);}
+ assert.notEqual(phase[2].paletteId,'intro-mono');
 }
-console.log('PASS: 1000 sessions, counts, uniqueness, no repeated digits, four directions, choices and determinism');
+assert.deepEqual(q,generateQuestions('learning'));console.log('PASS: six guided steps, distinct answers at each stage, choices, monochrome and color stages');

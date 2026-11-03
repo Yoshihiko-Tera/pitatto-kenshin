@@ -8,3 +8,16 @@
 .cv-phase-symbol{font-size:clamp(3rem,8vw,5rem);font-weight:800;color:#0f766e;letter-spacing:.15em;margin:2rem 0}.cv-content [data-cv-phase-copy]{font-size:1.3rem;line-height:1.8}.cv-content [data-cv-transition]{padding:1.5rem 0}.cv-content [data-cv-phase-start]{margin-top:1rem;min-height:64px}
 
 .cv-content [data-cv-intro]>p:first-of-type{font-size:1.15rem;line-height:1.9;margin:1.25rem 0}.cv-intro-flow{background:#edf6ee;border-radius:16px;padding:12px 20px;margin:20px auto 0;max-width:540px;text-align:left}.cv-intro-flow p{margin:8px 0;line-height:1.8;display:flex;gap:12px;justify-content:space-between;align-items:center}.cv-intro-flow strong{white-space:nowrap;color:#115e59}.cv-intro-time{margin:12px 0 24px;font-size:1.05rem}.cv-content [data-cv-intro]>.cv-note{max-width:660px;margin:0 auto 24px;text-align:left;line-height:1.9}.cv-content [data-cv-intro]{padding:12px 0}@media(max-width:480px){.cv-intro-flow{padding:10px 12px}.cv-intro-flow p{font-size:.95rem;gap:6px}}
+
+.cv-step-copy{max-width:660px;margin:16px auto;font-size:1.15rem;line-height:1.9;text-align:left}.cv-content [data-cv-demo-next]{margin:12px 0;min-height:64px}
+
+/* Tablet-readable instructions, including the introduction and completion message. */
+#color-vision-screen .cv-step-copy{font-size:clamp(1.25rem,2.4vw,1.5rem);line-height:1.85;max-width:680px;margin:20px auto 24px;text-align:left;font-weight:500}
+#color-vision-screen .cv-content [data-cv-intro]>p:first-of-type{font-size:clamp(1.25rem,2.4vw,1.5rem);line-height:1.85}
+#color-vision-screen .cv-demo-hint{font-size:clamp(1.2rem,2.2vw,1.4rem);line-height:1.8;padding:16px}
+#color-vision-screen .cv-content [data-cv-end]>.cv-note{font-size:clamp(1.25rem,2.4vw,1.5rem);line-height:1.9;text-align:left;max-width:680px;margin:20px auto 28px}
+#color-vision-screen .cv-intro-flow,#color-vision-screen .cv-intro-time{font-size:1.2rem}
+#color-vision-screen .cv-content [data-cv-intro]>.cv-note{font-size:1.05rem;line-height:1.9}
+@media(max-width:520px){#color-vision-screen .cv-step-copy{margin:16px auto 20px}#color-vision-screen .cv-intro-flow p{flex-wrap:wrap;font-size:1.05rem}}
+
+#color-vision-screen .cv-step-copy{white-space:pre-line}
